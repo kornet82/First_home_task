@@ -2,7 +2,7 @@ import os
 import json
 import re
 import sqlite3
-import pprint
+import requests
 from flask import Flask, jsonify, abort, request, g
 from pathlib import Path
 from flask_sqlalchemy import SQLAlchemy
@@ -36,9 +36,9 @@ list_text = []
 list_id_str = []
 list_id_int = []
 for i in range(len(data_list)):
-    print(data_list[i])
+    # print(data_list[i])
     list_text.append(data_list[i].get('text'))
-    list_id_int.append(data_list[i].get('id_str'))
+    list_id_str.append(data_list[i].get('id_str'))
 
 print(list_text)
 print(list_id_str)
@@ -70,26 +70,34 @@ class TableModel(db.Model):
 db.create_all()
 
 
-def get_all_table():
-    items_in_table = TableModel.query.all()
-    spisok = [items_in_table.to_dict() for item in items_in_table]
-    return jsonify(spisok)
-
-
 @app.route("/lists")
 def table_list():
     items = TableModel.query.all()
-    spisok = [items.to_dict() for item in items]
+    spisok = [item.to_dict() for item in items]
     return jsonify(spisok), 200
 
 
 @app.route("/create", methods=["POST"])
 def create_pole():
-    author_data = request.json
-    author = TableModel(**author_data)
-    db.session.add(author)
+    for i in range(len(data_list)):
+        pole1 = TableModel(list_text[i], list_id_str[i], list_id_int[i])
+        pole2 = TableModel(list_text[i], list_id_str[i], list_id_int[i])
+        pole3 = TableModel(list_text[i], list_id_str[i], list_id_int[i])
+    db.session.add(pole1)
+    db.session.add(pole2)
+    db.session.add(pole3)
     db.session.commit()
-    return author.to_dict(), 201
+    return f'Created', 201
+
+
+# url = 'https://api.example.com/api/dir/v1/accounts/9999999/orders'
+# headers = {'Authorization' : ‘(some auth code), 'Accept' : 'application/json', 'Content-Type' : 'application/json'}
+# r = requests.post(url, data=open('example.json', 'rb'), headers=headers)
+
+#  Если вы хотите отправить файл меньшего размера, отправьте его как строку.
+#
+# contents = open('example.json', 'rb').read()
+# r = requests.post(url, data=contents, headers=headers)
 
 
 #
